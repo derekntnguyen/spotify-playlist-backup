@@ -30,7 +30,7 @@ async fn main() {
         reqwest::StatusCode::OK => {
             // on success, parse our JSON to an APIResponse
             match response.json::<APIResponse>().await {
-                Ok(parsed) => print_tracks(parsed.tracks.items.iter().collect()),
+                Ok(parsed) => write_tracks(parsed.tracks.items.iter().collect()),
                 Err(_) => println!("Unexpected json structure"),
             };
         }
