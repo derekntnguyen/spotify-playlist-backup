@@ -1,6 +1,6 @@
 # Spotify Playlist Generator
 
-Automatic spotify playlist backup written in Rust leveraging GitHub Actions.
+Automatic spotify playlist generator (psuedo Spotify Song Radio) written in Rust leveraging GitHub Actions.
 
 ## Motivation
 
