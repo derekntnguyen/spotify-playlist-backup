@@ -2,7 +2,7 @@ use reqwest;
 use reqwest::header::ACCEPT;
 use reqwest::header::AUTHORIZATION;
 use reqwest::header::CONTENT_TYPE;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::env;
 use std::fs::File;
 use std::io::BufWriter;
@@ -30,7 +30,7 @@ async fn main() {
         reqwest::StatusCode::OK => {
             // on success, parse our JSON to an APIResponse
             match response.json::<APIResponse>().await {
-                Ok(parsed) => write_tracks(parsed.tracks.items.iter().collect()),
+                Ok(parsed) => write_tracks(parsed.tracks.iter().collect()),
                 Err(_) => println!("Unexpected json structure"),
             };
         }
@@ -48,13 +48,14 @@ fn write_tracks(tracks: Vec<&Track>) {
     let f = File::create(path).expect("Error opening file.");
     let mut f = BufWriter::new(f);
     for track in tracks {
-        write!(f, "{}", format!("Track: {}", track.name)).expect("Error writing to file.");
-        write!(f, "{}", format!("Album: {}", track.album.name)).expect("Error writing to file.");
-        write!(
+        writeln!(f, "{}", format!("Track: {}", track.name)).expect("Error writing to file.");
+        writeln!(f, "{}", format!("   Album: {}", track.album.name))
+            .expect("Error writing to file.");
+        writeln!(
             f,
             "{}",
             format!(
-                "Artist(s): {}",
+                "   Artist(s): {}",
                 track
                     .album
                     .artists
@@ -64,41 +65,37 @@ fn write_tracks(tracks: Vec<&Track>) {
             )
         )
         .expect("Error writing to file.");
-        write!(f, "{}", format!("URL: {}", track.external_urls.spotify))
+        writeln!(f, "{}", format!("   URL: {}", track.external_urls.spotify))
             .expect("Error writing to file.");
-        write!(f, "{}", "---------").expect("Error writing to file.");
+        writeln!(f, "{}", "\n").expect("Error writing to file.");
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize, Debug)]
 struct APIResponse {
-    tracks: Items<Track>,
+    tracks: Vec<Track>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-struct Items<T> {
-    items: Vec<T>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize, Debug)]
 struct Track {
     album: Album,
-    href: String,
-    name: String,
     external_urls: ExternalUrls,
+    name: String,
 }
-#[derive(Serialize, Deserialize, Debug)]
+
+#[derive(Deserialize, Debug)]
 struct Album {
     artists: Vec<Artist>,
-    external_urls: ExternalUrls,
+    // external_urls: ExternalUrls,
     name: String,
 }
-#[derive(Serialize, Deserialize, Debug)]
+
+#[derive(Deserialize, Debug)]
 struct Artist {
     name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize, Debug)]
 struct ExternalUrls {
     spotify: String,
 }
